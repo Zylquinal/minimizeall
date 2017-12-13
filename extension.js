@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013-2014, Charles Santos Silva (silva.charlessantos@gmail.com)
+  Copyright (c) 2013-2017, Charles Santos Silva (silva.charlessantos@gmail.com)
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -45,7 +45,7 @@ function _notify() {
 
 	if (isMessageTweener()){
 
-	
+
 	    if (!text) {
 		text = new St.Label({ style_class: 'notify-label', text: msg });
 		Main.uiGroup.add_actor(text);
@@ -63,61 +63,86 @@ function _notify() {
 		               time: 8,
 		               transition: 'easeOutQuad',
 		              onComplete: _hide});
-	} else 
+	} else
    	    Main.notify(msg);
    }
 
 }
 
-function _minimize() {
-    _notify();
-    
-    let activeWorkspace = global.screen.get_active_workspace();
-    let windows = activeWorkspace.list_windows();
-    for (let i = 0; i < windows.length; i++) {
-	   //Gnome 3.12 removed tracker.is_window_interesting, now uses !window.skip_taskbar
-           if (!windows[i].minimized && !windows[i].skip_taskbar) {
-	       windows[i].minimize();
-           }
-    }
-    Main.overview.hide();
+function _minimize(windows) {
+	_notify();
+
+	for (let i = 0; i < windows.length; i++)
+		if (!windows[i].minimized &&  !windows[i].is_skip_taskbar())
+			windows[i].minimize();
+
+	Main.overview.hide();
 }
 
+function _maximize(windows)  {
+
+	//Sort windows
+	windows = global.display.sort_windows_by_stacking(windows);
+
+	for (let i = 0; i < windows.length; i++)
+           if (windows[i].minimized &&  !windows[i].is_skip_taskbar())
+	       windows[i].unminimize();
+
+}
+
+
+function _click(){
+	let m = 1;
+	let windows = global.screen.get_active_workspace().list_windows();
+
+	// Check if has any window not minimized
+	for (let i = 0; i < windows.length; i++)
+           if (!windows[i].minimized &&  !windows[i].is_skip_taskbar()) {
+           	m = 0;
+        	break;
+           }
+
+	if (m === 0)
+		_minimize(windows);
+	 else
+		_maximize(windows);
+}
+
+
 function init(extensionMeta) {
-    settings = convenience.getSettings(extension);
+	settings = convenience.getSettings(extension);
 	convenience.initTranslations("minimizeall");
 
-    let theme = imports.gi.Gtk.IconTheme.get_default();
-    theme.append_search_path(extensionMeta.path + "/icons");
+	let theme = imports.gi.Gtk.IconTheme.get_default();
+	theme.append_search_path(extensionMeta.path + "/icons");
 
-    button = new St.Bin({ style_class: 'panel-button',
+	button = new St.Bin({ style_class: 'panel-button',
                           reactive: true,
                           can_focus: true,
                           x_fill: true,
                           y_fill: false,
                           track_hover: true });
-    let icon = new St.Icon({ icon_name: 'minimize-symbolic',
+	let icon = new St.Icon({ icon_name: 'minimize-symbolic',
                              style_class: 'system-status-icon' });
 
-    button.set_child(icon);
-    button.connect('button-press-event', _minimize);
+	button.set_child(icon);
+	button.connect('button-press-event', _click);
 }
 
 function isShowMessage(){
-    let msgtype = settings.get_string('message');
-    return !(msgtype == 'none');
+	let msgtype = settings.get_string('message');
+	return !(msgtype == 'none');
 }
 
 function isMessageTweener(){
-    let msgtype = settings.get_string('message');
-    return msgtype == 'tweener';
+	let msgtype = settings.get_string('message');
+	return msgtype == 'tweener';
 }
 
 function enable() {
-    Main.panel._rightBox.insert_child_at_index(button, 0);
+	Main.panel._rightBox.insert_child_at_index(button, 0);
 }
 
 function disable() {
-    Main.panel._rightBox.remove_child(button);
-};
-
+	Main.panel._rightBox.remove_child(button);
+}
