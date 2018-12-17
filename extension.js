@@ -93,7 +93,7 @@ function _maximize(windows)  {
 
 function _click(){
 	let m = 1;
-	let windows = global.screen.get_active_workspace().list_windows();
+	let windows = global.workaspace_manager.get_active_workspace().list_windows();
 
 	// Check if has any window not minimized
 	for (let i = 0; i < windows.length; i++)
