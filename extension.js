@@ -30,6 +30,7 @@ let extension = imports.misc.extensionUtils.getCurrentExtension();
 const convenience = extension.imports.convenience;
 
 const Gettext = imports.gettext.domain('minimizeall');
+const Gio = imports.gi.Gio;
 const _ = Gettext.gettext;
 
 let text, button, settings;
@@ -113,8 +114,6 @@ function init(extensionMeta) {
 	settings = convenience.getSettings(extension);
 	convenience.initTranslations("minimizeall");
 
-	let theme = imports.gi.Gtk.IconTheme.get_default();
-	theme.append_search_path(extensionMeta.path + "/icons");
 
 	button = new St.Bin({ style_class: 'panel-button',
                           reactive: true,
@@ -122,8 +121,9 @@ function init(extensionMeta) {
                           x_fill: true,
                           y_fill: false,
                           track_hover: true });
-	let icon = new St.Icon({ icon_name: 'minimize-symbolic',
-                             style_class: 'system-status-icon' });
+
+	let gicon = Gio.icon_new_for_string(extensionMeta.path + '/icons/minimize-symbolic.svg');
+	let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon'});
 
 	button.set_child(icon);
 	button.connect('button-press-event', _click);
