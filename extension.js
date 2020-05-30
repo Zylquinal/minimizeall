@@ -41,7 +41,7 @@ function _click(){
 	}
         
 	// Check if has any window not minimized
-	let minimize = global.workspace_manager.get_active_workspace().list_windows().filter(function(w){return !w.minimized;}).length > 0;
+	let minimize = global.workspace_manager.get_active_workspace().list_windows().filter(function(w){return !w.minimized;}).length > 0 || Main.overview._shown;
 
 	global.display.sort_windows_by_stacking(windows).forEach(function(window){
 		if (minimize)
