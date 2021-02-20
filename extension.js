@@ -56,7 +56,7 @@ function _click(){
 
 
 function init(extensionMeta) {
-	button = new St.Bin({ style_class: 'panel-button', reactive: true, can_focus: true, x_fill: true, y_fill: false, track_hover: true });
+	button = new St.Bin({ style_class: 'panel-button', reactive: true, can_focus: true, track_hover: true });
 	
 	let gicon = Gio.icon_new_for_string(extensionMeta.path + '/icons/minimize-symbolic.svg');
 	let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon'});
