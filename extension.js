@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013-2020, Charles Santos Silva (silva.charlessantos@gmail.com)
+  Copyright (c) 2013-2020, Charles Santos Silva (oi@charles.dev.br)
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -32,6 +32,20 @@ function _hide() {
     text = null;
 }
 
+function canMinimize(window, c_minimized) {
+	if (c_minimized && window.minimized)
+		return false;
+
+	if (window.is_skip_taskbar !== undefined)
+		return window.is_skip_taskbar();
+		
+	if (window.can_minimize == undefined)
+		return true;
+		
+	return window.can_minimize();
+
+}
+
 function _click(){
         let windows = global.workspace_manager.get_active_workspace().list_windows();
 
@@ -41,9 +55,9 @@ function _click(){
 	}
         
 	// Check if has any window not minimized
-	let minimize = global.workspace_manager.get_active_workspace().list_windows().filter(function(w){return !w.minimized;}).length > 0 || Main.overview._shown;
+	let minimize = global.workspace_manager.get_active_workspace().list_windows().filter(function(w){return canMinimize(w, true);}).length > 0 || Main.overview._shown;
 
-	global.display.sort_windows_by_stacking(windows).forEach(function(window){
+	global.display.sort_windows_by_stacking(windows).filter(function(w){return canMinimize(w, false);}).forEach(function(window){
 		if (minimize)
 			window.minimize();
 		else
@@ -57,6 +71,7 @@ function _click(){
 
 function init(extensionMeta) {
 	button = new St.Bin({ style_class: 'panel-button', reactive: true, can_focus: true, track_hover: true });
+
 	
 	let gicon = Gio.icon_new_for_string(extensionMeta.path + '/icons/minimize-symbolic.svg');
 	let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon'});
