@@ -37,11 +37,11 @@ function canMinimize(window, c_minimized) {
 		return false;
 
 	if (window.is_skip_taskbar !== undefined)
-		return window.is_skip_taskbar();
-		
+		return !window.is_skip_taskbar();
+
 	if (window.can_minimize == undefined)
 		return true;
-		
+
 	return window.can_minimize();
 
 }
