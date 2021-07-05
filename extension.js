@@ -1,5 +1,5 @@
 /*
-  Copyright (c) 2013-2020, Charles Santos Silva (oi@charles.dev.br)
+  Copyright (c) 2013-2021, Charles Santos Silva (oi@charles.dev.br)
 
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
@@ -24,6 +24,7 @@
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const Gio = imports.gi.Gio;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 let text, button;
 
@@ -53,7 +54,7 @@ function _click(){
  		Main.overview.hide();
 		return;
 	}
-        
+
 	// Check if has any window not minimized
 	let minimize = global.workspace_manager.get_active_workspace().list_windows().filter(function(w){return canMinimize(w, true);}).length > 0 || Main.overview._shown;
 
@@ -63,27 +64,28 @@ function _click(){
 		else
 			window.unminimize();
 	});
-		
+
 	if (minimize)
 		Main.overview.hide();
 }
 
 
 function init(extensionMeta) {
-	button = new St.Bin({ style_class: 'panel-button', reactive: true, can_focus: true, track_hover: true });
 
-	
-	let gicon = Gio.icon_new_for_string(extensionMeta.path + '/icons/minimize-symbolic.svg');
-	let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon'});
-
-	button.set_child(icon);
-	button.connect('button-press-event', _click);
 }
 
 function enable() {
+	button = new St.Bin({ style_class: 'panel-button', reactive: true, can_focus: true, track_hover: true });
+	let gicon = Gio.icon_new_for_string(Me.path + '/icons/minimize-symbolic.svg');
+	let icon = new St.Icon({ gicon: gicon, style_class: 'system-status-icon'});
+	button.set_child(icon);
+	button.connect('button-press-event', _click);
+
 	Main.panel._rightBox.insert_child_at_index(button, 0);
 }
 
 function disable() {
 	Main.panel._rightBox.remove_child(button);
+	button.destroy();
+	button = null;
 }
